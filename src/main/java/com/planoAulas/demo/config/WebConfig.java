@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         System.out.println("cors on");
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:4200") // URL do seu site no ar
+                .allowedOrigins("https://raulvini.github.io") // URL do seu site no ar
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
