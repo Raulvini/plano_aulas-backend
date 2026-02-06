@@ -1,27 +1,27 @@
 # Estágio 1: Build
-FROM gradle:8.4-jdk17-alpine AS build
+
+# Etapa 1: Build
+FROM gradle:8.8-jdk21 AS build
 WORKDIR /app
 
-# Copia os arquivos de configuração do Gradle para cache de dependências
-COPY build.gradle settings.gradle ./
-# Se você usa o wrapper do gradle (pastas gradle/ e arquivo gradlew)
-COPY gradle ./gradle
-COPY gradlew ./
-RUN ./gradlew dependencies --no-daemon
+# Copia todos os arquivos do projeto
+COPY . .
 
-# Copia o código fonte e gera o jar
-COPY src ./src
-RUN ./gradlew bootJar --no-daemon
+# Dá permissão de execução pro gradlew
+RUN chmod +x gradlew
 
-# Estágio 2: Runtime
-FROM eclipse-temurin:17-jre-alpine
+# Compila e gera o .jar
+RUN ./gradlew clean build -x test
+
+# Etapa 2: Runtime
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
-# O Gradle por padrão gera o jar em build/libs/
-# O wildcard *-SNAPSHOT.jar ou *.jar garante que pegue o arquivo correto
+# Copia o JAR gerado na etapa anterior
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# Porta padrão (o Render injetará a variável $PORT)
+# Expõe a porta padrão do Spring Boot
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Xmx512m", "-jar", "app.jar"]
+# Comando para rodar a aplicação
+ENTRYPOINT ["java", "-jar", "app.jar"]
